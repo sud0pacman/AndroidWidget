@@ -3,19 +3,19 @@ package com.sudo_pacman.currencyusd
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
-import android.os.AsyncTask
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.lifecycle.lifecycleScope
+import com.google.gson.Gson
+import com.sudo_pacman.currencyusd.currency.Currency
 import com.sudo_pacman.currencyusd.currency.CurrencyThread
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import thread.Service
-import java.lang.StringBuilder
-import java.net.HttpURLConnection
-import java.net.URL
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
 
 /**
  * Implementation of App Widget functionality.
@@ -48,18 +48,47 @@ class CurrencyWidget : AppWidgetProvider() {
 internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
     val views = RemoteViews(context.packageName, R.layout.currency_widget)
 
-    CurrencyThread { list ->
-        // Use the currency list here
-        val usd = list.filter { it.Ccy == "USD" }
-        Log.d("TTT", "updateAppWidget $usd")
-        views.setTextViewText(R.id.tv_currency, usd[0].Rate)
+    Log.d("TTT", "updateAppWidget")
+
+    CoroutineScope(Dispatchers.Default).launch {
+        val responseData = fetchDataFromNetwork()
+        // Use the responseData here after the job is done
+        Log.d("TTT", "${responseData.size} mashincha data keldi")
+
+        val usd = responseData.filter { it.Ccy == "USD" }[0]
+
+        // Set the text for different TextViews
+        views.setTextViewText(R.id.tv_currency, usd.Rate)
+
+        // Instruct the widget manager to update the widget
+        appWidgetManager.updateAppWidget(appWidgetId, views)
     }
-
-
-
-    // Instruct the widget manager to update the widget
-    appWidgetManager.updateAppWidget(appWidgetId, views)
 }
+
+
+private suspend fun fetchDataFromNetwork(): List<Currency> {
+    return withContext(Dispatchers.IO) {
+        val url = "http://cbu.uz/uzc/arkhiv-kursov-valyut/json/"
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(url)
+            .build()
+
+        try {
+            val response = client.newCall(request).execute()
+            val responseData = response.body?.string()
+            responseData?.let {
+                val gson = Gson()
+                val currencies = gson.fromJson(it, Array<Currency>::class.java)
+                currencies.toList()
+            } ?: emptyList()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+}
+
 
 //fun getCurrentCurrency(): String {
 //    val service = Service()

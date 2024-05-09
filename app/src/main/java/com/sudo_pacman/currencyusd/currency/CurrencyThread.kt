@@ -1,7 +1,6 @@
 package com.sudo_pacman.currencyusd.currency
 
 import com.google.gson.Gson
-import thread.Service
 import java.lang.StringBuilder
 import java.net.HttpURLConnection
 import java.net.URL

@@ -1,8 +1,7 @@
-package thread
+package com.sudo_pacman.currencyusd.currency
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.sudo_pacman.currencyusd.currency.Currency
 import java.io.File
 
 class Service {
