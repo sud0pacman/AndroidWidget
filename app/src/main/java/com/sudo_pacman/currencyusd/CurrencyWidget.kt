@@ -5,10 +5,8 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.util.Log
 import android.widget.RemoteViews
-import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.sudo_pacman.currencyusd.currency.Currency
-import com.sudo_pacman.currencyusd.currency.CurrencyThread
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
